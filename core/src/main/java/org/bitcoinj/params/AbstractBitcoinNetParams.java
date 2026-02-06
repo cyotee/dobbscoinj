@@ -135,11 +135,15 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
          for (int i = 0; i < blockstogoback; i++) {
              if (cursor == null) {
-                 // This should never happen. If it does, it means we are following an incorrect or busted chain.
-                 throw new VerificationException(
-                         "Difficulty transition point but we did not find a way back to the genesis block.");
+                 // Using checkpoint system, there may not be enough blocks to do this diff adjust, so skip
+                 return;
              }
              cursor = blockStore.get(cursor.getHeader().getPrevBlockHash());
+         }
+
+         if (cursor == null) {
+             // Not enough blocks in store to verify difficulty (SPV checkpoint boundary)
+             return;
          }
 
          Block blockIntervalAgo = cursor.getHeader();
@@ -203,11 +207,15 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
          for (int i = 0; i < blockstogoback; i++) {
              if (cursor == null) {
-                 // This should never happen. If it does, it means we are following an incorrect or busted chain.
-                 throw new VerificationException(
-                         "Difficulty transition point but we did not find a way back to the genesis block.");
+                 // Using checkpoint system, there may not be enough blocks to do this diff adjust, so skip
+                 return;
              }
              cursor = blockStore.get(cursor.getHeader().getPrevBlockHash());
+         }
+
+         if (cursor == null) {
+             // Not enough blocks in store to verify difficulty (SPV checkpoint boundary)
+             return;
          }
 
          Block blockIntervalAgo = cursor.getHeader();
@@ -274,15 +282,19 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
          for (int i = 0; i < blockstogoback; i++) {
              if (cursor == null) {
-                 // This should never happen. If it does, it means we are following an incorrect or busted chain.
-                 throw new VerificationException(
-                         "Difficulty transition point but we did not find a way back to the genesis block.");
+                 // Using checkpoint system, there may not be enough blocks to do this diff adjust, so skip
+                 return;
              }
              cursor = blockStore.get(cursor.getHeader().getPrevBlockHash());
          }
          watch.stop();
          if (watch.elapsed(TimeUnit.MILLISECONDS) > 50)
              log.info("Difficulty transition traversal took {}", watch);
+
+         if (cursor == null) {
+             // Not enough blocks in store to verify difficulty (SPV checkpoint boundary)
+             return;
+         }
 
          Block blockIntervalAgo = cursor.getHeader();
          long timespan = (int) (prev.getTimeSeconds() - blockIntervalAgo.getTimeSeconds());
