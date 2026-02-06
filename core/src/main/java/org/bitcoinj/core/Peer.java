@@ -401,7 +401,9 @@ public class Peer extends PeerSocketHandler {
         } else if (m instanceof UTXOsMessage) {
             processUTXOMessage((UTXOsMessage) m);
         } else if (m instanceof RejectMessage) {
-            log.error("{} {}: Received {}", this, getPeerVersionMessage().subVer, m);
+            VersionMessage peerVersion = getPeerVersionMessage();
+            String peerSubVer = peerVersion != null ? peerVersion.subVer : "(unknown)";
+            log.error("{} {}: Received {}", this, peerSubVer, m);
         } else {
             log.warn("{}: Received unhandled message: {}", this, m);
         }
